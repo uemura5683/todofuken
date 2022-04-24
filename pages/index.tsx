@@ -1,32 +1,66 @@
 import Head from 'next/head'
-import ReactDOM from "react-dom";
+import { createRoot } from 'react-dom/client';
 import axios from "axios"
 import styles from '../styles/Home.module.css'
-import React, { useState, useEffect } from "react"
+import React from "react"
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
+let value:any = [];
+
 function Home(prefectures) {
+  const obj = prefectures.prefectures.result;
 
-  const [options, setUsers] = useState([])
-  , urls = 'https://opendata.resas-portal.go.jp/api/v1/population/sum/perYear?cityCode=-&prefCode=1';
+　const oncChangeevent = (e) => {
 
-  useEffect(() => {
-    axios.get(urls, { headers: { 'X-API-KEY': process.env.API } })
-      .then(res => setUsers(res.data))
-      .catch(error => console.log(error));
-  }, [] );
+  const HighchartsReacts = document.getElementById( 'HighchartsReact' );
 
-  const oncChangeevent = (e) => {
-    e.preventDefault();
-    const HighchartsReacts: Element = document.getElementById( 'HighchartsReact' );
-    const root = ReactDOM.createRoot(
-      HighchartsReacts
-    );
+    for (var li = 1; li <= 47; li++) {
+      let inputelement = document.getElementById( 'input_' + li ) as HTMLInputElement
+        , labelelement = document.getElementById( 'label_' + li );
+
+      if( inputelement.checked === true ) {
+        const url = 'https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=' + inputelement.value;
+        axios.get(
+          url, {
+            headers: { 'X-API-KEY': process.env.API }
+          }
+        ).then(
+          res => {
+            let val:any = [];
+            let results:any = res;
+            let linedata = results.data.result.data[0].data;
+            linedata.forEach(
+              function(is_data:any) { 
+                val.push ( is_data.value );
+              }
+            );
+            value.push ( {
+              name: labelelement.innerText,
+              data: val,
+              pointPlacement: 'on'
+            } )
+          }
+        );
+      }
+    }
+    let years = [ 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030, 2035, 2040, 2045 ]
+
+    const option = {
+      chart: { polar: true,　type: 'line' }, 
+      title: { text: '総人口', x: 0 },
+      pane: { size: '100%' },
+      xAxis: { categories: years, tickmarkPlacement: 'on', lineWidth: 0 },
+      yAxis: { gridLineInterpolation: '人口数', lineWidth: 0, min: 0 },
+      series: value
+    };
+    const root = createRoot(HighchartsReacts);
     root.render(
-      // <HighchartsReact highcharts={Highcharts} options={options.result.line.data} />
+      <HighchartsReact highcharts={Highcharts} options={option} />
     )
   }
+
+
 
   return (
     <div className={styles.container}>
@@ -39,26 +73,32 @@ function Home(prefectures) {
         <h1 className={styles.title}>
           都道府県一覧
         </h1>
-        {prefectures ? (
-          <>
-            <h3>都道府県</h3>
-            <ul className={styles.ul}>
-              {prefectures.prefectures.result.map((prefecture, idnex) => (
-                <li className={styles.li} key={idnex}>
-                  <label htmlFor={`id_${prefecture.prefCode}`} className={styles.label}>
-                    <input
-                      id={`id_${prefecture.prefCode}`}
-                      type="checkbox"
-                      onChange={oncChangeevent}
-                      value={prefecture.prefCode}
-                    />
-                    {prefecture.prefName}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null }
+        <div id="Checkboxlist">
+          {prefectures ? (
+            <>
+              <h3>都道府県</h3>
+              <ul className={styles.ul}>
+                {obj.map((prefecture, index) => {
+                    return(
+                      <li className={styles.li} key={index}>
+                      <label htmlFor={`input_${prefecture.prefCode}`} className={styles.label} id={`label_${prefecture.prefCode}`}>
+                        <input
+                          id={`input_${prefecture.prefCode}`}
+                          type="checkbox"
+                          onChange={(e) => oncChangeevent(e.currentTarget.value)}
+                          value={prefecture.prefCode}
+                          name={prefecture.prefName}
+                        />
+                        {prefecture.prefName}
+                      </label>
+                    </li>
+                    )
+                  }
+                )}
+              </ul>
+            </>
+          ) : null }
+        </div>
         <div id="HighchartsReact"></div>
       </main>
       <footer className={styles.footer}></footer>
@@ -72,7 +112,6 @@ export async function getStaticProps() {
   const prefectures = await fetch('https://opendata.resas-portal.go.jp/api/v1/prefectures', key)
         .then((res: { json: () => any }) => res.json())
         .catch(() => null);
-
   return {
     props: {
       prefectures: prefectures,
