@@ -6,9 +6,10 @@ import React from "react"
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-let value:any = [];
+let value: Highcharts.SeriesOptionsType[] = [];
+let years = [ '1965', '1970', '1975', '1980', '1985', '1990', '1995', '2000', '2005', '2010', '2015', '2020', '2025', '2030', '2035', '2040', '2045' ];
 
-function Home(prefectures) {
+function Home(prefectures, option) {
   const obj = prefectures.prefectures.result;
 
 　const oncChangeevent = (e) => {
@@ -18,7 +19,6 @@ function Home(prefectures) {
     for (var li = 1; li <= 47; li++) {
       let inputelement = document.getElementById( 'input_' + li ) as HTMLInputElement
         , labelelement = document.getElementById( 'label_' + li );
-
       if( inputelement.checked === true ) {
         const url = 'https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=' + inputelement.value;
         axios.get(
@@ -36,23 +36,29 @@ function Home(prefectures) {
               }
             );
             value.push ( {
+              type: "line",
               name: labelelement.innerText,
               data: val,
-              pointPlacement: 'on'
             } )
           }
         );
       }
     }
-    let years = [ 1965, 1970, 1975, 1980, 1985, 1990, 1995, 2000, 2005, 2010, 2015, 2020, 2025, 2030, 2035, 2040, 2045 ]
 
-    const option = {
+    const option: Highcharts.Options = {
       chart: { polar: true,　type: 'line' }, 
-      title: { text: '総人口', x: 0 },
+      title: { text: '総人口' },
       pane: { size: '100%' },
-      xAxis: { categories: years, tickmarkPlacement: 'on', lineWidth: 0 },
-      yAxis: { gridLineInterpolation: '人口数', lineWidth: 0, min: 0 },
-      series: value
+      xAxis: {
+        title: {
+          text: "年度",
+        },
+        categories: years,
+      },
+      yAxis: { title: { text: "人口数", }, },
+      series: value.length === 0
+                ? [{ type: "line", name: "都道府県名", data: [] }]
+                : value,
     };
     const root = createRoot(HighchartsReacts);
     root.render(
@@ -85,7 +91,7 @@ function Home(prefectures) {
                         <input
                           id={`input_${prefecture.prefCode}`}
                           type="checkbox"
-                          onChange={(e) => oncChangeevent(e.currentTarget.value)}
+                          onChange={(e) => oncChangeevent(e.currentTarget)}
                           value={prefecture.prefCode}
                           name={prefecture.prefName}
                         />
@@ -99,7 +105,9 @@ function Home(prefectures) {
             </>
           ) : null }
         </div>
-        <div id="HighchartsReact"></div>
+        <div id="HighchartsReact">
+          <HighchartsReact highcharts={Highcharts} options={option} />
+        </div>
       </main>
       <footer className={styles.footer}></footer>
     </div>
@@ -112,9 +120,26 @@ export async function getStaticProps() {
   const prefectures = await fetch('https://opendata.resas-portal.go.jp/api/v1/prefectures', key)
         .then((res: { json: () => any }) => res.json())
         .catch(() => null);
+
+  const option = {
+    chart: { polar: true,　type: 'line' }, 
+    title: { text: '総人口' },
+    pane: { size: '100%' },
+    xAxis: {
+      title: {
+        text: "年度",
+      },
+      categories: years,
+    },
+    yAxis: { title: { text: "人口数", }, },
+    series: value
+  };
+
+
   return {
     props: {
       prefectures: prefectures,
+      option: option,
     },
   };
 }
