@@ -1,12 +1,8 @@
 import React from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import styles from '../styles/Home.module.css'
 
-const Styles: { [key: string]: React.CSSProperties } = {
-  graph: {
-    padding: "12px",
-  },
-};
 
 type Props = {
   populationdata: {
@@ -15,7 +11,6 @@ type Props = {
   }[];
 };
 
-// 選んだ都道府県の人口推移グラフを表示するコンポーネント
 const Graph: React.FC<Props> = ({ populationdata }) => {
   let series: Highcharts.SeriesOptionsType[] = [];
   let categories = [];
@@ -57,7 +52,7 @@ const Graph: React.FC<Props> = ({ populationdata }) => {
   };
 
   return (
-    <div style={Styles.graph}>
+    <div className={styles.graph}>
       <HighchartsReact highcharts={Highcharts} options={options} />
     </div>
   );

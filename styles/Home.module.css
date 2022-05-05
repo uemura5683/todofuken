@@ -1,5 +1,5 @@
 .container {
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 
 .ul {
@@ -19,6 +19,10 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.graph {
+  width: 100%;
 }
 
 .footer {
