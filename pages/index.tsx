@@ -35,19 +35,10 @@ function Home() {
     check: boolean
   ) => {
     let c_prefPopulation = prefPopulation.slice();
-
     if (check) {
-      if (
-        c_prefPopulation.findIndex(
-          (value) => value.prefName === prefName)
-          !==　-1
-      )
+      if ( c_prefPopulation.findIndex( (value) => value.prefName === prefName) !== -1 )
         return;
-
-      axios
-        .get(
-          "https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=" +
-            String(prefCode),
+        axios.get( "https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=" + String(prefCode),
           {
             headers: { "X-API-KEY": process.env.API },
           }
@@ -57,15 +48,12 @@ function Home() {
             prefName: prefName,
             data: results.data.result.data[0].data,
           });
-
           setPrefPopulation(c_prefPopulation);
         })
         .catch((error) => {
           return;
         });
-    }
-    // チェックを外した処理
-    else {
+    } else {
       const deleteIndex = c_prefPopulation.findIndex(
         (value) => value.prefName === prefName
       );
@@ -74,7 +62,6 @@ function Home() {
       setPrefPopulation(c_prefPopulation);
     }
   };
-
   return (
     <div className={styles.container}>
       <Head>
