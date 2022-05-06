@@ -17,12 +17,10 @@ const Graph: React.FC<Props> = ({ populationdata }) => {
 
   for (let p of populationdata) {
     let data = [];
-
     for (let pd of p.data) {
       data.push(pd.value);
       categories.push(String(pd.year));
     }
-
     series.push({
       type: "line",
       name: p.prefName,
@@ -40,6 +38,15 @@ const Graph: React.FC<Props> = ({ populationdata }) => {
       },
       categories: categories,
     },
+    plotOptions: {
+      spline: {
+          marker: {
+              radius: 4,
+              lineColor: '#666666',
+              lineWidth: 1
+          }
+      }
+    },
     yAxis: {
       title: {
         text: "人口数",
@@ -52,9 +59,11 @@ const Graph: React.FC<Props> = ({ populationdata }) => {
   };
 
   return (
+    <>
     <div className={styles.graph}>
       <HighchartsReact highcharts={Highcharts} options={options} />
-    </div>
+    </div>    
+    </>
   );
 };
 export default Graph;

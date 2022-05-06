@@ -85,7 +85,6 @@ function Home() {
           <Graph populationdata={prefPopulation} />
         </div>
       </main>
-      <footer className={styles.footer}></footer>
     </div>
   )
 }
