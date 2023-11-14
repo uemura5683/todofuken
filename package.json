@@ -7,7 +7,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "axios": "^0.26.1",
+    "axios": "^1.6.0",
     "highcharts": "^10.0.0",
     "highcharts-react-official": "^3.1.0",
     "next": "13.5.6",
